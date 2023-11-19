@@ -1,7 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { registerUser } from "../../../features/auth/authApiSlice";
+import { basicAlert } from "../../../utils/sweetAlert";
+import { setmsgEmpty } from "../../../features/auth/authSlice";
 
 const Register = () => {
+  const dispatch = useDispatch();
+  const { error, message } = useSelector((state) => state.auth);
   const [input, setInput] = useState({
     name: "",
     email: "",
@@ -17,9 +24,56 @@ const Register = () => {
   };
 
   //handleSubmit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!input.name || !input.email || !input.password) {
+      return basicAlert(
+        {
+          title: "Try Again",
+          msg: "All Fields are Required",
+        },
+        "error"
+      );
+    }
+
+    dispatch(
+      registerUser({
+        name: input.name,
+        email: input.email,
+        password: input.password,
+      })
+    );
+    setInput({
+      name: "",
+      email: "",
+      password: "",
+    });
   };
+
+  useEffect(() => {
+    if (error) {
+      basicAlert(
+        {
+          title: "error",
+          msg: error,
+        },
+        "error"
+      );
+      dispatch(setmsgEmpty());
+    }
+    if (message) {
+      basicAlert(
+        {
+          title: "successful",
+          msg: message,
+        },
+        "success"
+      );
+      dispatch(setmsgEmpty());
+    }
+  }, [error, message]);
+
   return (
     <>
       <div className="h-screen flex items-center justify-around">
